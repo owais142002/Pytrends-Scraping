@@ -56,16 +56,16 @@
                     </select>                                                                                                                                            
                 </div>
 
-                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                <!-- <div class="form-section w-full flex space-x-4 items-center justify-center">
                     <label class="block text-sm font-bold text-gray-700">
                         <input type="checkbox" id="includeCity" name="includeCity" onchange="toggleCitySelect()"> Include city in keyword
                     </label>
-                </div>
+                </div> -->
 
-                <div class="form-section w-full flex space-x-4 items-center justify-center" id="citySection" style="display: none;">
+                <div class="form-section w-full flex space-x-4 items-center justify-center" id="citySection" style="display: flex;">
                     <label for="city" class="block text-sm font-bold text-gray-700 w-1/5">City</label>
                     <select id="city" name="city" class="border rounded-md px-3 py-2 w-4/5" disabled>
-                        <option value="" disabled selected>Select a city</option>
+                        <option value="" disabled selected>Cities Available</option>
                     </select>
                 </div>
 
@@ -156,15 +156,15 @@
         const last5YearsRadioButton = document.getElementById('last5Years');
 
         // Show/hide city input based on the "Include city in keyword" checkbox
-        const includeCityCheckbox = document.getElementById("includeCity");
-        const citySection = document.getElementById("citySection");
+        // const includeCityCheckbox = document.getElementById("includeCity");
+        // const citySection = document.getElementById("citySection");
         const citySelect = document.getElementById("city");
 
         
-        includeCityCheckbox.addEventListener("change", () => {
-            //citySelect.disabled = !includeCityCheckbox.checked;
-            citySection.style.display = includeCityCheckbox.checked ? "flex" : "none";
-        });
+        // includeCityCheckbox.addEventListener("change", () => {
+        //     //citySelect.disabled = !includeCityCheckbox.checked;
+        //     citySection.style.display = includeCityCheckbox.checked ? "flex" : "none";
+        // });
         var city_json;
         // Disable city input until a country is selected
         const countrySelect = document.getElementById("country");

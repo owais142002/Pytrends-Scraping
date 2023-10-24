@@ -134,11 +134,11 @@ app = Flask(__name__)
 def plot():
     keyword = request.form.get('keyword')
     country = request.form.get('country')
-    city_flag = request.form.get('includeCity')
-    if city_flag:
-        city = request.form.get('city')
-    else:
-        city = None    
+    # city_flag = request.form.get('includeCity')
+    # if city_flag:
+    #     city = request.form.get('city')
+    # else:
+    #     city = None    
     timeframe_flag = request.form.get('timeframe')
     
     if timeframe_flag=="all":
@@ -162,11 +162,9 @@ def plot():
         translator= Translator(to_lang=language)            
     if translate_flag and language:
         keyword=translator.translate(keyword)
-    if city_flag:
-        keyword=keyword+' '+city
-    print(keyword)
-    print(country_code)
-    print(timeframe)
+    # if city_flag:
+    #     keyword=keyword+' '+city
+
     timeframe_df=sendPytrendReqTimeframe([keyword],country_code,timeframe)[0]
 #     try:
 #         country_df=sendPytrendReqCountry([keyword],timeframe)[0]
