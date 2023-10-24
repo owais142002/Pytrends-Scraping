@@ -147,7 +147,7 @@
         countrySelect.addEventListener("change", () => {
             citySelect.disabled = countrySelect.value === "";
             city_collection = country_city_json[countrySelect.value];
-            citySelect.innerHTML = '<option value="" disabled selected>Select a city</option>';
+            citySelect.innerHTML = '<option value="" disabled selected>Cities Available</option>';
             city_collection.forEach(function(item) {
                 var option = document.createElement("option");
                 option.text = item;
