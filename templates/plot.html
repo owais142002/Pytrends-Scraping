@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>    
+    <title>Pytrends</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for horizontal layout */
+        .horizontal-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+        .form-section {
+            flex: 1;
+        }
+        .tab-button {
+            background-color: #DDD;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .active-tab {
+            background-color: #007BFF;
+            color: #FFF;
+        }
+
+        .chart-container {
+            display: none;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center w-full bg-gray-100">
+
+    <div class="mx-auto w-1/3 bg-white h-screen p-12 shadow-2xl flex flex-col items-center justify-center space-y-24">
+        <h1 class="text-2xl font-bold">Pytrends Data Visualisation</h1>
+        <form action="/plot" method="POST" class="w-full">
+            <div class="horizontal-layout flex flex-col items-center justify-center space-y-4 px-2">
+                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                    <label for="keyword" class="block text-sm font-bold text-gray-700 w-1/5">Keyword</label>
+                    <input type="text" id="keyword" name="keyword" class="border rounded-md px-3 py-2 w-4/5" required>
+                </div>
+
+                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                    <label for="country" class="block text-sm font-bold text-gray-700 w-1/5">Country</label>
+                    <select id="country" name="country" class="border rounded-md px-3 py-2 w-4/5" required>
+                        <option value="" disabled selected>Select a country</option>
+                        {{option_tag_string_countries|safe}}
+                    </select>                                                                                                                                            
+                </div>
+
+                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                    <label class="block text-sm font-bold text-gray-700">
+                        <input type="checkbox" id="includeCity" name="includeCity" onchange="toggleCitySelect()"> Include city in keyword
+                    </label>
+                </div>
+
+                <div class="form-section w-full flex space-x-4 items-center justify-center" id="citySection" style="display: none;">
+                    <label for="city" class="block text-sm font-bold text-gray-700 w-1/5">City</label>
+                    <select id="city" name="city" class="border rounded-md px-3 py-2 w-4/5" disabled>
+                        <option value="" disabled selected>Select a city</option>
+                    </select>
+                </div>
+
+                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                    <label class="block text-sm font-bold text-gray-700">Timeframe</label>
+                    <label class="block text-sm text-gray-700">
+                        <input type="radio" name="timeframe" value="all" id="all" onchange="toggleCustomTimeSection()" checked> All
+                    </label>
+                    <label class="block text-sm text-gray-700">
+                        <input type="radio" name="timeframe" value="last5Years" id="last5Years" onchange="toggleCustomTimeSection()"> Last 5 Years
+                    </label>
+                    <label class="block text-sm text-gray-700">
+                        <input type="radio" name="timeframe" value="custom" id="customTime" onchange="toggleCustomTimeSection()"> Custom
+                    </label>
+                </div>
+
+                <div class="form-section w-full flex flex-col space-y-4 items-center justify-center" id="customTimeSection" style="display: none;">
+                    <div class="flex items-center justify-center space-x-4 w-full">
+                        <label for="startDate" class="block text-sm font-bold text-gray-700 w-1/5">Start Date</label>
+                        <input type="date" id="startDate" name="startDate" class="border rounded-md px-3 py-2 w-4/5">
+                    </div>
+                    <div class="flex items-center justify-center space-x-4 w-full">
+                        <label for="endDate" class="block text-sm font-bold text-gray-700 w-1/5">End Date</label>
+                        <input type="date" id="endDate" name="endDate" class="border rounded-md px-3 py-2 w-4/5">
+                    </div>
+                </div>
+
+                <div class="form-section w-full flex space-x-4 items-center justify-center">
+                    <label class="block text-sm font-bold text-gray-700">
+                        <input type="checkbox" id="translate" name="translate"> Translate
+                    </label>
+                </div>
+
+                <button id="submitBtn" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-1/2">Get Data</button>
+                
+            </div>
+            
+        </form>
+    </div>
+    
+    <div class="flex flex-col w-2/3 items-center justify-center space-y-4">
+        <!-- Tab Buttons -->
+        <div class="flex space-x-4">
+            <button id="tab1" class="tab-button" onclick="showChart(1)">Timeframe Line Graph</button>
+            <button id="tab2" class="tab-button" onclick="showChart(2)">Regional Keyword Searched</button>
+            <!-- <button id="tab3" class="tab-button" onclick="showChart(3)">Regional Keyword Searched</button> -->
+        </div>
+
+        <!-- Chart Containers -->
+        <div id="chartContainer1" class="chart-container">
+            <div id='chart1' class='chart1'></div>
+        </div>
+        <div id="chartContainer2" class="chart-container">
+            <div id='chart2' class='chart2'></div>
+        </div>
+        <!-- <div id="chartContainer3" class="chart-container">
+            <div id='chart3' class='chart3'></div>
+        </div> -->
+    </div>
+
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+        var graphs1 = {{graphJSON1|safe}};
+        console.log(graphs1);
+        if('error' in graphs1){
+            document.getElementById('chart1').innerHTML = "No Data Found!";
+        }
+        else{
+            Plotly.plot('chart1',graphs1,{});     
+        }
+        
+        var graphs2 = {{graphJSON2|safe}};
+        Plotly.plot('chart2',graphs2,{});    
+    </script>
+
+    <script>
+        const submitBtn = document.getElementById("submitBtn");
+        document.querySelector('form').addEventListener('submit', function() {
+            // Disable the submit button and show the loading indicator
+            submitBtn.setAttribute("disabled", "disabled");
+            document.getElementById("submitBtn").innerHTML = 'Fetching...'
+        });
+
+        const country_city_json = {{cities_countries_dict|safe}};
+        const customTimeCheckbox = document.getElementById('customTime');
+        const customTimeSection = document.getElementById('customTimeSection');
+        const allRadioButton = document.getElementById('all');
+        const last5YearsRadioButton = document.getElementById('last5Years');
+
+        // Show/hide city input based on the "Include city in keyword" checkbox
+        const includeCityCheckbox = document.getElementById("includeCity");
+        const citySection = document.getElementById("citySection");
+        const citySelect = document.getElementById("city");
+
+        
+        includeCityCheckbox.addEventListener("change", () => {
+            //citySelect.disabled = !includeCityCheckbox.checked;
+            citySection.style.display = includeCityCheckbox.checked ? "flex" : "none";
+        });
+        var city_json;
+        // Disable city input until a country is selected
+        const countrySelect = document.getElementById("country");
+
+        countrySelect.addEventListener("change", () => {
+            citySelect.disabled = countrySelect.value === "";
+            city_collection = country_city_json[countrySelect.value];
+            citySelect.innerHTML = '<option value="" disabled selected>Select a city</option>';
+            city_collection.forEach(function(item) {
+                var option = document.createElement("option");
+                option.text = item;
+                option.value = item;
+                citySelect.appendChild(option);
+            });            
+        });
+        function toggleCitySelect() {
+            var includeCityCheckbox = document.getElementById("includeCity");
+            var citySelect = document.getElementById("city");
+
+            if (includeCityCheckbox.checked) {
+                citySelect.removeAttribute("disabled");
+                citySelect.setAttribute("required", "required");
+            } else {
+                citySelect.setAttribute("disabled", "disabled");
+                citySelect.removeAttribute("required");
+            }
+            }        
+
+        function toggleCustomTimeSection() {
+            var customTimeRadio = document.getElementById("customTime");
+            var customTimeSection = document.getElementById("customTimeSection");
+            var startDateInput = document.getElementById("startDate");
+            var endDateInput = document.getElementById("endDate");
+
+            if (customTimeRadio.checked) {
+                customTimeSection.style.display = "flex";
+                startDateInput.setAttribute("required", "required");
+                endDateInput.setAttribute("required", "required");
+            } else {
+                customTimeSection.style.display = "none";
+                startDateInput.removeAttribute("required");
+                endDateInput.removeAttribute("required");
+            }
+        }
+
+        function showChart(chartNumber) {
+            // Hide all charts and tabs
+            for (let i = 1; i <= 2; i++) {
+                document.getElementById(`chartContainer${i}`).style.display = "none";
+                document.getElementById(`tab${i}`).classList.remove("active-tab");
+            }
+            // Show the selected chart and mark the corresponding tab as active
+            document.getElementById(`chartContainer${chartNumber}`).style.display = "block";
+            document.getElementById(`tab${chartNumber}`).classList.add("active-tab");
+        }
+        showChart(1);
+    </script>
+</body>
+</html>
